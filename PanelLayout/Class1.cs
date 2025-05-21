@@ -14,6 +14,8 @@ namespace ConcaveConvexEdgeVisualizer
 {
     public class Commands
     {
+        public const double EPSILON = 10e-10;
+
         [CommandMethod("PNL")]
         public void HighlightConcaveConvexEdges()
         {
@@ -42,8 +44,16 @@ namespace ConcaveConvexEdgeVisualizer
                         {
                             foreach (Edge edge in loop.Edges)
                             {
-                                Point3d v1 = edge.Vertex1.Point;
-                                Point3d v2 = edge.Vertex2.Point;
+                                Point3d v1 = new Point3d(
+                                    Math.Round(edge.Vertex1.Point.X),
+                                    Math.Round(edge.Vertex1.Point.Y),
+                                    Math.Round(edge.Vertex1.Point.Z)
+                                );
+                                Point3d v2 = new Point3d(
+                                    Math.Round(edge.Vertex2.Point.X),
+                                    Math.Round(edge.Vertex2.Point.Y),
+                                    Math.Round(edge.Vertex2.Point.Z)
+                                );
 
                                 var key = (v1.X < v2.X) || (v1.X == v2.X && v1.Y < v2.Y) || (v1.X == v2.X && v1.Y == v2.Y && v1.Z < v2.Z)
                                     ? (v1, v2)
@@ -79,30 +89,33 @@ namespace ConcaveConvexEdgeVisualizer
                             Vector3d u1 = n1.Value.GetNormal();
                             Vector3d u2 = n2.Value.GetNormal();
 
-                            Vector3d cross = u1.CrossProduct(u2);
-                            Vector3d direction = key.Item2 - key.Item1;
-                            double sign = cross.DotProduct(direction) >= 0 ? 1 : -1;
+                            //if ((u1.Z - u2.Z) > EPSILON)
+                            //{
+                                Vector3d cross = u1.CrossProduct(u2);
+                                Vector3d direction = key.Item2 - key.Item1;
+                                double sign = cross.DotProduct(direction) >= 0 ? 1 : -1;
+                                double angleDeg = u1.GetAngleTo(u2) * (180.0 / Math.PI) * sign;
 
-                            double angleDeg = u1.GetAngleTo(u2) * (180.0 / Math.PI) * sign;
+                                ed.WriteMessage($"\nEdge: {key.Item1} → {key.Item2}");
+                                ed.WriteMessage($"\n    Sign: {sign}");
+                                ed.WriteMessage($"\n    Normal 1: {u1}");
+                                ed.WriteMessage($"\n    Normal 2: {u2}");
+                                ed.WriteMessage($"\n    Angle: {angleDeg:F1}°");
 
-                            ed.WriteMessage($"\nEdge: {key.Item1} → {key.Item2}");
-                            ed.WriteMessage($"\nNormal1: {u1}, Normal2: {u2}, Angle: {angleDeg:F1}°");
+                                int colorIndex;
+                                if (angleDeg > 0)
+                                    colorIndex = 1; // Concave → Red
+                                else
+                                    colorIndex = 3; // Convex → Green
 
-                            int colorIndex;
-                            if (angleDeg > 150)
-                                colorIndex = 1; // Concave → Red
-                            else if (angleDeg < -150)
-                                colorIndex = 3; // Convex → Green
-                            else
-                                colorIndex = 2; // Slanted → Yellow
+                                Line edgeLine = new Line(key.Item1, key.Item2)
+                                {
+                                    ColorIndex = colorIndex
+                                };
 
-                            Line edgeLine = new Line(key.Item1, key.Item2)
-                            {
-                                ColorIndex = colorIndex
-                            };
-
-                            btr.AppendEntity(edgeLine);
-                            tr.AddNewlyCreatedDBObject(edgeLine, true);
+                                btr.AppendEntity(edgeLine);
+                                tr.AddNewlyCreatedDBObject(edgeLine, true);
+                            //}
                         }
                     }
                 }
