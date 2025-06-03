@@ -93,11 +93,11 @@ namespace ConcaveConvexEdgeVisualizer
 
                         if (n1.HasValue && n2.HasValue)
                         {
-                            if (Math.Abs((key.Item1.X - key.Item2.X)) > EPSILON)
-                            {
+                            //if (Math.Abs((key.Item1.Y - key.Item2.Y)) > EPSILON)
+                            //{
                                 index++;
 
-                                if (index == 4)
+                                if (index > 0)
                                 {
                                     bool isConvex = IsEdgeConvex(solid, faceList, edgeMid, key);
 
@@ -130,23 +130,23 @@ namespace ConcaveConvexEdgeVisualizer
                                     tr.AddNewlyCreatedDBObject(edgeLine, true);
 
 
-                                    Point3d centroid0 = Utils.TryGetFaceCentroid(faceList[0]).GetValueOrDefault();
-                                    Point3d centroid1 = Utils.TryGetFaceCentroid(faceList[1]).GetValueOrDefault();
-                                    Point3d testPoint = new Point3d(
-                                        (centroid0.X + centroid1.X) / 2,
-                                        (centroid0.Y + centroid1.Y) / 2,
-                                        (centroid0.Z + centroid1.Z) / 2
-                                    );
+                                    //Point3d centroid0 = Utils.TryGetFaceCentroid(faceList[0]).GetValueOrDefault();
+                                    //Point3d centroid1 = Utils.TryGetFaceCentroid(faceList[1]).GetValueOrDefault();
+                                    //Point3d testPoint = new Point3d(
+                                    //    (centroid0.X + centroid1.X) / 2,
+                                    //    (centroid0.Y + centroid1.Y) / 2,
+                                    //    (centroid0.Z + centroid1.Z) / 2
+                                    //);
 
-                                    Vector3d direction = testPoint - edgeMid;
-                                    Point3d endPoint = edgeMid + direction.GetNormal() * 100; // scale to some visible length
-                                    Line testLine = new Line(edgeMid, endPoint)
-                                    {
-                                        ColorIndex = 6
-                                    };
+                                    //Vector3d direction = testPoint - edgeMid;
+                                    //Point3d endPoint = edgeMid + direction.GetNormal() * 100; // scale to some visible length
+                                    //Line testLine = new Line(edgeMid, endPoint)
+                                    //{
+                                    //    ColorIndex = 6
+                                    //};
 
-                                    btr.AppendEntity(testLine);
-                                    tr.AddNewlyCreatedDBObject(testLine, true);
+                                    //btr.AppendEntity(testLine);
+                                    //tr.AddNewlyCreatedDBObject(testLine, true);
 
                                     tempLines.Add(edgeLine.ObjectId); // Store reference
                                 }
@@ -185,7 +185,7 @@ namespace ConcaveConvexEdgeVisualizer
                                 //}
 
                             }
-                        }
+                        //}
                     }
                 }
 

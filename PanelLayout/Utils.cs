@@ -100,9 +100,9 @@ namespace PanelLayout
                     Vector3d? n = TryGetSurfaceNormal(face.Surface);
                     if (n.HasValue)
                     {
-                        // Check if the ray is parallel to the X-axis
-                        if (n.Value.IsParallelTo(Vector3d.XAxis))
-                        {
+                        //// Check if the ray is parallel to the X-axis
+                        //if (n.Value.IsParallelTo(Vector3d.YAxis))
+                        //{
                             List<BoundedPlane> boundedPlanes = GetBoundedPlane(face);
                             foreach (var boundedPlane in boundedPlanes)
                             {
@@ -119,17 +119,40 @@ namespace PanelLayout
                                     }
                                 }
                             }
-                        }
+                        //}
                     }
                 }
 
                 // remove duplicate points and midpoint  
                 intersectionPoints = intersectionPoints.Distinct(new Point3dEqualityComparer()).ToList(); // Fixed the error by using List<T>.Distinct()  
                 intersectionCount += intersectionPoints.Count;
+
+                // Check if there is 3 intersection points forms a line
+                var count = intersectionPoints.Count;
+                if (count >= 3)
+                {
+                    for (int i = 0; i < count - 2; i++)
+                    {
+                        for (int j = i + 1; j < count - 1; j++)
+                        {
+                            for (int k = j + 1; k < count; k++)
+                            {
+                                Point3d p1 = intersectionPoints[i];
+                                Point3d p2 = intersectionPoints[j];
+                                Point3d p3 = intersectionPoints[k];
+
+                                // Check if the points are collinear
+                                if ((p2 - p1).IsParallelTo(p3 - p1))
+                                {
+                                    intersectionCount -= 1; // Reduce the count by 1 for each collinear set
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            // Return true if the number of intersections is odd  
-            //MessageBox.Show($"Intersection count: {intersectionCount}");
+            // Return true if the number of intersections is odd
             if (intersectionCount % 2 == 1) // Concave
                 return true;
             else
